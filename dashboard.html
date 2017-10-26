@@ -17,18 +17,27 @@
 <body>
 
     <div>
-        <h3>Chart</h3>
+        <h3>Chart 1</h3>
         <div id="first-chart"></div>
+    </div>
+    
+    <div>
+        <h3>Chart 2</h3>
+        <div id="second-chart"></div>
     </div>
 
     <script>
+   
     queue()
         .defer(d3.csv, "data/Salaries.csv")
         .await(makeGraphs);
+   
     function makeGraphs(error, transactionsData) {
         var ndx = crossfilter(transactionsData);
+   
         var gender_dim = ndx.dimension(dc.pluck('sex'));
         var gender_measure = gender_dim.group();
+   
         dc.barChart("#first-chart")
             .width(300)
             .height(150)
@@ -38,10 +47,30 @@
             .transitionDuration(500)
             .x(d3.scale.ordinal())
             .xUnits(dc.units.ordinal)
-            .xAxisLabel("Person")
+            .xAxisLabel("Gender")
             .yAxis().ticks(4);
+            
+        var rank_dim = ndx.dimension(dc.pluck('rank'));
+        var rank_measure = rank_dim.group();
+   
+        dc.barChart("#second-chart")
+            .width(300)
+            .height(150)
+            .margins({top: 10, right: 50, bottom: 30, left: 50})
+            .dimension(rank_dim)
+            .group(rank_measure)
+            .transitionDuration(500)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
+            .xAxisLabel("Rank")
+            .yAxis().ticks(4);
+        
+        
+    
         dc.renderAll();
     }
+    
+    
     </script>
 </body>
 </html>

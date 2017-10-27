@@ -16,6 +16,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+    <script type="text/javascript" src="js/graphs.js"></script>
 
 </head>
 <body>
@@ -24,117 +25,21 @@
     <div id="second-line-of-charts" class="row">
 
         <div class="col-md-4">
-            <h3>Men vs Women</h3>
+            <h6>Men outnumber women 10 to 1</h6>
             <div id="amount-men-women-chart" class="chart"></div>
         </div>
         
         <div class="col-md-4">
-            <h3>Who Earn More</h3>
+            <h6>Men earn on average about 15% more</h6>
             <div id="earnings-chart" class="chart"></div>
         </div>
         
         <div class="col-md-4">
-            <h3>Distribution of roles</h3>
+            <h6>Distribution of ranks is weighted towards the upper level for men.</h6>
             <div id="distributions-chart" class="chart"></div>
         </div>
     </div>
     <hr>
 
-    <script>
-   
-    queue()
-        .defer(d3.csv, "data/Salaries.csv")
-        .await(makeGraphs);
-   
-    function makeGraphs(error, transactionsData) {
-        var ndx = crossfilter(transactionsData);
-   
-    transactionsData.forEach(function(d){
-      d.salary = parseFloat(d.salary);
-            if (isNaN(d.salary)) {
-                d.salary = 0;  
-    }})
-    
-   
-        var gender_dim = ndx.dimension(dc.pluck('sex'));
-        var gender_measure = gender_dim.group();
-   
-        dc.barChart("#amount-men-women-chart")
-            .width(300)
-            .height(250)
-            .margins({top: 10, right: 50, bottom: 30, left: 50})
-            .dimension(gender_dim)
-            .group(gender_measure)
-            .transitionDuration(500)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .xAxisLabel("Gender")
-            .yAxis().ticks(4);
-            
-        
-        var earning_dim = ndx.dimension(dc.pluck('sex'));
-        
-            function add_item(p, v) {
-                p.count++;
-                p.total += v.salary;
-                p.average = p.total / p.count;
-                return p;
-            }
-        
-        
-            function remove_item(p, v) {
-                p.count--;
-                if(p.count == 0){
-                    p.total = 0;
-                    p.average = 0;
-                } else {
-                    p.total -= v.salary;
-                    p.average = p.total / p.count;
-                }
-                return p;
-            }
-        
-            function init() {
-                return { count: 0, total: 0, average: 0 };
-            }
-            
-        var earning_measure = earning_dim.group().reduce(add_item, remove_item, init);
-        
-        
-        dc.barChart("#earnings-chart")
-            .width(300)
-            .height(250)
-            .margins({top: 10, right: 50, bottom: 30, left: 50})
-            .dimension(earning_dim)
-            .group(earning_measure)
-            .valueAccessor(function (d) {
-                console.log(d.value.average);
-                return d.value.average;
-            })
-            .transitionDuration(500)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .xAxisLabel("Gender")
-            .yAxis().ticks(4);
-        
-        var rank_dim = ndx.dimension(dc.pluck('rank'));
-        var rank_measure = rank_dim.group();
-   
-        dc.barChart("#distributions-chart")
-            .width(300)
-            .height(250)
-            .margins({top: 10, right: 50, bottom: 30, left: 50})
-            .dimension(rank_dim)
-            .group(rank_measure)
-            .transitionDuration(500)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .xAxisLabel("Rank")
-            .yAxis().ticks(4);
-        
-    
-        dc.renderAll();
-    };
-    </script>
 </body>
 </html>
